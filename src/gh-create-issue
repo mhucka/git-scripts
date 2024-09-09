@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Summary: open an issue in a GitHub repo.
+#
+# This is useful when the caller is something that creates a barebones
+# shell enviornment. I use this in a Keyboard Maestro action to create
+# issues quickly.
+#
+# Copyright 2024 Michael Hucka.
+# License: MIT license – see file "LICENSE" in the project website.
+# Website: https://github.com/mhucka/git-scripts
+
+if [[ $# -ne 1 ]]; then
+    echo "Usage: $0 OWNER/REPO" 2>&1
+    exit
+fi
+repo=$1
+
+export USER=mhucka
+export HOME=/Users/mhucka
+
+# This next thing is a fake. It seems "gh issue create --editor" checks
+# that TERM is set and bails if it isn't.
+export TERM=xterm
+
+source $HOME/.bash_profile
+
+cmd="/opt/homebrew/bin/gh issue create --editor --repo $repo"
+
+script -Fq /dev/null bash -c "$cmd" 2>&1 |\
+    grep https |\
+    tr -d '\n\r' |\
+    xargs -I {} open {}
